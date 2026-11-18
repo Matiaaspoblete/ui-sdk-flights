@@ -1,0 +1,29 @@
+{
+  "name": "departures-ui-sdk-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "capture": "node scripts/capture.mjs",
+    "render": "remotion render src/index.ts LaunchVideo ../public/launch.mp4 --codec=h264 --crf=26",
+    "poster": "remotion still src/index.ts LaunchVideo ../public/poster.jpg --frame=420 --image-format=jpeg --jpeg-quality=82",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.544",
+    "@remotion/google-fonts": "^4.0.544",
+    "@remotion/tailwind-v4": "^4.0.544",
+    "culori": "^4.0.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "^4.0.544",
+    "tailwindcss": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/culori": "^4.0.1",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.9.3"
+  }
+}
