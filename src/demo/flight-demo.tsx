@@ -58,12 +58,11 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { AgentPanel, type LogEntry } from "./agent-panel"
 import { ALLOWED_ACTIONS, getAgent } from "./agent"
 import { BoardingPass } from "./boarding-pass"
+import type { Board as LiveBoard } from "@/server/flights"
 import {
   AIRPORTS,
-  DEMO_DATE,
-  DEMO_MAX_DATE,
-  DEMO_MIN_DATE,
   HUB,
+  addDays,
   flightsFor,
   formatDate,
   type Direction,
@@ -71,14 +70,21 @@ import {
   type FlightStatus,
 } from "./flight-data"
 
-type TerminalFilter = "all" | "T1" | "T2"
+type TerminalFilter = string
 type Target = "board" | "airport" | "date" | "terminal" | "list" | "pass"
 
-const TERMINALS: { value: TerminalFilter; label: string }[] = [
-  { value: "all", label: "All terminals" },
-  { value: "T1", label: "Terminal 1" },
-  { value: "T2", label: "Terminal 2" },
-]
+function terminalOptions(flights: Flight[]): { value: TerminalFilter; label: string }[] {
+  const terminals = [...new Set(flights.map((flight) => flight.terminal))]
+    .filter((terminal) => terminal !== "—")
+    .sort()
+  return [
+    { value: "all", label: "All terminals" },
+    ...terminals.map((terminal) => ({
+      value: terminal,
+      label: `Terminal ${terminal.replace(/^T/, "")}`,
+    })),
+  ]
+}
 
 const STATUS_TONE: Record<FlightStatus, string> = {
   "On time": "neutral",
@@ -90,7 +96,6 @@ const STATUS_TONE: Record<FlightStatus, string> = {
   Cancelled: "red",
 }
 
-const AGENT_DATE = "2026-11-20"
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms))
@@ -163,7 +168,7 @@ function Board({
                 </span>
               </span>
               <span className="lab-mono">
-                {flight.terminal} · {flight.gate}
+                {flight.terminal === "—" ? flight.gate : `${flight.terminal} · ${flight.gate}`}
               </span>
               <StatusBadge status={flight.status} />
             </ListboxItem>
@@ -174,10 +179,13 @@ function Board({
   )
 }
 
-export function FlightDemo() {
+export function FlightDemo({ board }: { board: LiveBoard }) {
+  const today = board.today
+  const live = board.source === "airlabs"
+  const agentDate = addDays(today, 2)
   const [direction, setDirection] = useState<Direction>("departures")
   const [airport, setAirport] = useState<string | null>(null)
-  const [date, setDate] = useState<string | null>(DEMO_DATE)
+  const [date, setDate] = useState<string | null>(today)
   const [terminal, setTerminal] = useState<TerminalFilter>("all")
   const [selected, setSelected] = useState<string | null>(null)
   const [passOpen, setPassOpen] = useState(false)
@@ -186,14 +194,25 @@ export function FlightDemo() {
   const [log, setLog] = useState<LogEntry[]>([])
   const runId = useRef(0)
 
-  const day = date ?? DEMO_DATE
-  const flights = useMemo(() => flightsFor(day), [day])
+  const day = date ?? today
+  const liveDay = live && day === today
+  const flights = useMemo(
+    () => (liveDay ? board.flights : flightsFor(day, today)),
+    [liveDay, board.flights, day, today]
+  )
+  const airports = useMemo(() => {
+    const byCode = new Map(AIRPORTS.map((item) => [item.code, item]))
+    if (liveDay) for (const flight of flights) byCode.set(flight.airport.code, flight.airport)
+    return [...byCode.values()].sort((a, b) => a.city.localeCompare(b.city))
+  }, [liveDay, flights])
+  const terminals = useMemo(() => terminalOptions(flights), [flights])
+  const terminalFilter = terminals.some((item) => item.value === terminal) ? terminal : "all"
   const visible = (dir: Direction) =>
     flights.filter(
       (flight) =>
         flight.direction === dir &&
         (airport === null || flight.airport.code === airport) &&
-        (terminal === "all" || flight.terminal === terminal)
+        (terminalFilter === "all" || flight.terminal === terminalFilter)
     )
   const selectedFlight = flights.find((flight) => flight.id === selected) ?? null
 
@@ -208,7 +227,7 @@ export function FlightDemo() {
     setPassOpen(false)
     setDirection("departures")
     setAirport(null)
-    setDate(DEMO_DATE)
+    setDate(today)
     setTerminal("all")
     setSelected(null)
     setLog([])
@@ -246,8 +265,8 @@ export function FlightDemo() {
       },
       {
         target: "date",
-        text: `Pick ${formatDate(AGENT_DATE)}`,
-        step: async () => ({ ref: "Date", action: "setValue", args: [AGENT_DATE] }),
+        text: `Pick ${formatDate(agentDate)}`,
+        step: async () => ({ ref: "Date", action: "setValue", args: [agentDate] }),
       },
       {
         target: "terminal",
@@ -300,7 +319,9 @@ export function FlightDemo() {
         <div>
           <p className="lab-eyebrow">
             <span className="lab-pill">UI SDK beta</span>
-            <span className="lab-muted">Mock data · {HUB.name} ({HUB.code})</span>
+            <span className="lab-muted">
+              {live ? "Live today via AirLabs" : "Mock data"} · {HUB.name} ({HUB.code})
+            </span>
           </p>
           <h1 className="lab-title">Departures, operable by agents.</h1>
           <p className="lab-lede">
@@ -350,7 +371,7 @@ export function FlightDemo() {
             <ComboboxContent className="lab-popup" sideOffset={6} align="start">
               <ComboboxEmpty className="lab-empty">No airports found.</ComboboxEmpty>
               <ComboboxList className="lab-options">
-                {AIRPORTS.map((item) => (
+                {airports.map((item) => (
                   <ComboboxItem
                     key={item.code}
                     value={item.code}
@@ -379,8 +400,8 @@ export function FlightDemo() {
           <DatePicker
             value={date}
             onValueChange={(value) => setDate(typeof value === "string" ? value : null)}
-            min={DEMO_MIN_DATE}
-            max={DEMO_MAX_DATE}
+            min={addDays(today, -1)}
+            max={addDays(today, 7)}
             locale="en-GB"
           >
             <div className="lab-input-row">
@@ -413,9 +434,9 @@ export function FlightDemo() {
 
         <div className="lab-field" data-agent-target={target === "terminal" || undefined}>
           <Select
-            value={terminal}
+            value={terminalFilter}
             onValueChange={(value) => setTerminal((value as TerminalFilter | null) ?? "all")}
-            items={TERMINALS}
+            items={terminals}
           >
             <SelectLabel className="lab-label">Terminal</SelectLabel>
             <SelectTrigger className="lab-input lab-select">
@@ -423,7 +444,7 @@ export function FlightDemo() {
               <ChevronDownIcon aria-hidden="true" size={14} />
             </SelectTrigger>
             <SelectContent className="lab-popup lab-options" sideOffset={6} align="start">
-              {TERMINALS.map((item) => (
+              {terminals.map((item) => (
                 <SelectItem key={item.value} value={item.value} className="lab-option">
                   {item.label}
                   <SelectItemIndicator className="lab-check">
@@ -457,7 +478,9 @@ export function FlightDemo() {
                 </TabsTab>
                 <TabsIndicator className="lab-tab-indicator" />
               </TabsList>
-              <span className="lab-muted lab-small lab-mono">{formatDate(day)}</span>
+              <span className="lab-muted lab-small lab-mono">
+                {formatDate(day)} · {liveDay ? "live" : "mock"}
+              </span>
             </div>
             <TabsPanel value="departures" className="lab-panel">
               <Board

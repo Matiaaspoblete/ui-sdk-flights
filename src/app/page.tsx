@@ -1,7 +1,18 @@
 import { FlightDemo } from "@/demo/flight-demo"
+import { getBoard } from "@/server/flights"
 import "./lab.css"
 
-export default function Home() {
+export default async function Home() {
+  const board = await getBoard()
+  const updated = board.fetchedAt
+    ? new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Bucharest",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZoneName: "short",
+      }).format(new Date(board.fetchedAt))
+    : null
+
   return (
     <main className="lab">
       <header className="lab-nav">
@@ -24,7 +35,7 @@ export default function Home() {
         </a>
       </header>
 
-      <FlightDemo />
+      <FlightDemo board={board} />
 
       <section className="lab-video" aria-labelledby="lab-video-title">
         <div>
@@ -48,7 +59,17 @@ export default function Home() {
       </section>
 
       <footer className="lab-footer lab-muted lab-small">
-        Mock schedule for a demo. Airlines and flights are fictional.
+        {board.source === "airlabs" ? (
+          <>
+            Today&apos;s schedule from{" "}
+            <a className="lab-link" href="https://airlabs.co" target="_blank" rel="noreferrer">
+              AirLabs
+            </a>
+            , refreshed every 2 hours (last {updated}). Other days use fictional mock flights.
+          </>
+        ) : (
+          <>Mock schedule for a demo. Airlines and flights are fictional.{board.note ? ` ${board.note}` : ""}</>
+        )}
       </footer>
     </main>
   )

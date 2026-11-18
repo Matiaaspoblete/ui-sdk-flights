@@ -2,7 +2,7 @@
 
 A small flight board built with [Vercel's UI SDK](https://ui-sdk.dev/docs) (beta). People use it with the keyboard, and an agent drives the same components through `createAgent`, with no mouse simulation and no LLM. A 26-second launch video, made with [Remotion](https://www.remotion.dev) and [snapcn](https://snapcn.dev), is embedded on the page.
 
-All flight data is mock: the airlines are fictional and the hub is Bucharest (OTP).
+All flight data is mock: the airlines are fictional and the hub is Cluj-Napoca (CLJ).
 
 ## What's in it
 
