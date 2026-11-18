@@ -148,7 +148,7 @@ function BrowserShot() {
               fontSize: 18,
             }}
           >
-            departures / lab / ui-sdk
+            ui-sdk-flights
           </span>
         </div>
         <OffthreadVideo
@@ -187,7 +187,7 @@ function EndCard() {
             alignItems: "center",
           }}
         >
-          <span style={{ color: "#ededed" }}>Departures lab</span>
+          <span style={{ color: "#ededed" }}>ui-sdk-flights</span>
           <span>·</span>
           <span>UI SDK + createAgent</span>
           <span>·</span>
@@ -205,7 +205,7 @@ export function LaunchVideo() {
         <Sequence from={SCENES.title.from} durationInFrames={SCENES.title.duration}>
           <Fade duration={SCENES.title.duration}>
             <Grid />
-            <Eyebrow text="UI SDK lab · mock data" style={{ top: 330 }} />
+            <Eyebrow text="ui-sdk-flights · mock data" style={{ top: 330 }} />
             <TextReveal
               text="Departures, operable by agents."
               fontSize={104}
