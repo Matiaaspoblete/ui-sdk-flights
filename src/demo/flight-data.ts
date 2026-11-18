@@ -1,5 +1,5 @@
 export type Direction = "departures" | "arrivals"
-export type Terminal = "T1" | "T2"
+export type Terminal = string
 export type FlightStatus =
   | "On time"
   | "Boarding"
@@ -33,14 +33,12 @@ export type Flight = {
 }
 
 export const HUB: Airport = {
-  code: "OTP",
-  city: "Bucharest",
-  name: "Henri Coandă Intl.",
+  code: "CLJ",
+  city: "Cluj-Napoca",
+  name: "Avram Iancu Intl.",
 }
 
-export const DEMO_DATE = "2026-11-19"
-export const DEMO_MIN_DATE = "2026-11-16"
-export const DEMO_MAX_DATE = "2026-12-31"
+export const HUB_TIME_ZONE = "Europe/Bucharest"
 
 export const AIRPORTS: Airport[] = [
   { code: "LIS", city: "Lisbon", name: "Humberto Delgado" },
@@ -56,6 +54,128 @@ export const AIRPORTS: Airport[] = [
   { code: "ATH", city: "Athens", name: "Eleftherios Venizelos" },
   { code: "ZRH", city: "Zurich", name: "Kloten" },
 ]
+
+const KNOWN_AIRPORTS: Airport[] = [
+  ...AIRPORTS,
+  HUB,
+  { code: "BBU", city: "Bucharest", name: "Băneasa" },
+  { code: "OTP", city: "Bucharest", name: "Henri Coandă" },
+  { code: "IAS", city: "Iași", name: "Iași Intl." },
+  { code: "TSR", city: "Timișoara", name: "Traian Vuia" },
+  { code: "SBZ", city: "Sibiu", name: "Sibiu Intl." },
+  { code: "SCV", city: "Suceava", name: "Ștefan cel Mare" },
+  { code: "OMR", city: "Oradea", name: "Oradea Intl." },
+  { code: "CND", city: "Constanța", name: "Mihail Kogălniceanu" },
+  { code: "BCM", city: "Bacău", name: "George Enescu" },
+  { code: "CRA", city: "Craiova", name: "Craiova Intl." },
+  { code: "TGM", city: "Târgu Mureș", name: "Transilvania" },
+  { code: "LTN", city: "London", name: "Luton" },
+  { code: "STN", city: "London", name: "Stansted" },
+  { code: "LGW", city: "London", name: "Gatwick" },
+  { code: "BVA", city: "Paris", name: "Beauvais" },
+  { code: "ORY", city: "Paris", name: "Orly" },
+  { code: "FRA", city: "Frankfurt", name: "Frankfurt am Main" },
+  { code: "DUS", city: "Düsseldorf", name: "Düsseldorf" },
+  { code: "BER", city: "Berlin", name: "Brandenburg" },
+  { code: "HAM", city: "Hamburg", name: "Hamburg" },
+  { code: "CGN", city: "Cologne", name: "Köln Bonn" },
+  { code: "STR", city: "Stuttgart", name: "Stuttgart" },
+  { code: "NUE", city: "Nuremberg", name: "Nürnberg" },
+  { code: "MXP", city: "Milan", name: "Malpensa" },
+  { code: "BGY", city: "Milan", name: "Bergamo" },
+  { code: "LIN", city: "Milan", name: "Linate" },
+  { code: "CIA", city: "Rome", name: "Ciampino" },
+  { code: "BLQ", city: "Bologna", name: "Guglielmo Marconi" },
+  { code: "VCE", city: "Venice", name: "Marco Polo" },
+  { code: "TSF", city: "Venice", name: "Treviso" },
+  { code: "NAP", city: "Naples", name: "Capodichino" },
+  { code: "TRN", city: "Turin", name: "Caselle" },
+  { code: "BRU", city: "Brussels", name: "Brussels" },
+  { code: "CRL", city: "Brussels", name: "Charleroi" },
+  { code: "EIN", city: "Eindhoven", name: "Eindhoven" },
+  { code: "DUB", city: "Dublin", name: "Dublin" },
+  { code: "CPH", city: "Copenhagen", name: "Kastrup" },
+  { code: "ARN", city: "Stockholm", name: "Arlanda" },
+  { code: "OSL", city: "Oslo", name: "Gardermoen" },
+  { code: "HEL", city: "Helsinki", name: "Helsinki-Vantaa" },
+  { code: "WAW", city: "Warsaw", name: "Chopin" },
+  { code: "WMI", city: "Warsaw", name: "Modlin" },
+  { code: "KRK", city: "Kraków", name: "John Paul II" },
+  { code: "PRG", city: "Prague", name: "Václav Havel" },
+  { code: "BUD", city: "Budapest", name: "Ferenc Liszt" },
+  { code: "SOF", city: "Sofia", name: "Sofia" },
+  { code: "BEG", city: "Belgrade", name: "Nikola Tesla" },
+  { code: "KIV", city: "Chișinău", name: "Chișinău Intl." },
+  { code: "SKG", city: "Thessaloniki", name: "Makedonia" },
+  { code: "LCA", city: "Larnaca", name: "Larnaca" },
+  { code: "TLV", city: "Tel Aviv", name: "Ben Gurion" },
+  { code: "SAW", city: "Istanbul", name: "Sabiha Gökçen" },
+  { code: "AYT", city: "Antalya", name: "Antalya" },
+  { code: "DXB", city: "Dubai", name: "Dubai Intl." },
+  { code: "DWC", city: "Dubai", name: "Al Maktoum" },
+  { code: "DOH", city: "Doha", name: "Hamad" },
+  { code: "AUH", city: "Abu Dhabi", name: "Zayed" },
+  { code: "CAI", city: "Cairo", name: "Cairo Intl." },
+  { code: "HRG", city: "Hurghada", name: "Hurghada" },
+  { code: "SSH", city: "Sharm el-Sheikh", name: "Sharm el-Sheikh" },
+  { code: "TFS", city: "Tenerife", name: "Tenerife South" },
+  { code: "AGP", city: "Málaga", name: "Málaga" },
+  { code: "VLC", city: "Valencia", name: "Valencia" },
+  { code: "OPO", city: "Porto", name: "Francisco Sá Carneiro" },
+  { code: "NCE", city: "Nice", name: "Côte d'Azur" },
+  { code: "LYS", city: "Lyon", name: "Saint-Exupéry" },
+  { code: "MRS", city: "Marseille", name: "Provence" },
+  { code: "GVA", city: "Geneva", name: "Geneva" },
+  { code: "BSL", city: "Basel", name: "EuroAirport" },
+  { code: "JFK", city: "New York", name: "John F. Kennedy" },
+  { code: "TIA", city: "Tirana", name: "Nënë Tereza" },
+  { code: "ARW", city: "Arad", name: "Arad" },
+  { code: "BAY", city: "Baia Mare", name: "Baia Mare" },
+  { code: "ZAZ", city: "Zaragoza", name: "Zaragoza" },
+  { code: "PEK", city: "Beijing", name: "Capital" },
+  { code: "LCY", city: "London", name: "City" },
+  { code: "SVQ", city: "Seville", name: "Seville" },
+  { code: "PMI", city: "Palma", name: "Palma de Mallorca" },
+  { code: "ALC", city: "Alicante", name: "Alicante-Elche" },
+  { code: "CTA", city: "Catania", name: "Fontanarossa" },
+  { code: "BRI", city: "Bari", name: "Karol Wojtyła" },
+  { code: "PSA", city: "Pisa", name: "Galileo Galilei" },
+  { code: "FMM", city: "Memmingen", name: "Allgäu" },
+  { code: "DTM", city: "Dortmund", name: "Dortmund" },
+  { code: "FKB", city: "Karlsruhe", name: "Baden-Baden" },
+  { code: "HHN", city: "Frankfurt", name: "Hahn" },
+  { code: "BLL", city: "Billund", name: "Billund" },
+  { code: "MMX", city: "Malmö", name: "Malmö" },
+  { code: "BHX", city: "Birmingham", name: "Birmingham" },
+  { code: "LBA", city: "Leeds", name: "Leeds Bradford" },
+  { code: "DSA", city: "Doncaster", name: "Sheffield" },
+  { code: "KTW", city: "Katowice", name: "Pyrzowice" },
+]
+
+export function airportByCode(code: string): Airport {
+  return (
+    KNOWN_AIRPORTS.find((airport) => airport.code === code) ?? {
+      code,
+      city: code,
+      name: code,
+    }
+  )
+}
+
+export function addDays(date: string, days: number): string {
+  const parsed = new Date(`${date}T12:00:00Z`)
+  parsed.setUTCDate(parsed.getUTCDate() + days)
+  return parsed.toISOString().slice(0, 10)
+}
+
+export function todayIn(timeZone: string, now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now)
+}
 
 type Template = {
   airline: string
@@ -92,7 +212,7 @@ const TEMPLATES: Template[] = [
   { airline: "Halcyon", prefix: "HY", num: 703, city: "Athens", direction: "arrivals", time: "21:30", terminal: "T1", gate: "A11", aircraft: "E195-E2", duration: "1h 30m" },
 ]
 
-function hash(text: string): number {
+export function hash(text: string): number {
   let value = 2166136261
   for (let index = 0; index < text.length; index++) {
     value ^= text.charCodeAt(index)
@@ -114,7 +234,7 @@ export function airportByCity(city: string): Airport {
   return AIRPORTS.find((airport) => airport.city === city) ?? HUB
 }
 
-export function flightsFor(date: string): Flight[] {
+export function flightsFor(date: string, today: string): Flight[] {
   const daySeed = hash(date)
   const counters: Record<Direction, number> = { departures: 0, arrivals: 0 }
 
@@ -122,7 +242,7 @@ export function flightsFor(date: string): Flight[] {
     const seed = hash(`${date}-${template.prefix}${template.num}`)
     const index = counters[template.direction]++
     const statuses = template.direction === "departures" ? DEPARTURE_STATUSES : ARRIVAL_STATUSES
-    const isToday = date === DEMO_DATE
+    const isToday = date === today
     let status: FlightStatus = isToday ? statuses[index] ?? "On time" : "On time"
     if (!isToday && seed % 9 === 0) status = "Delayed"
     if (seed % 37 === 0 && template.city !== "Lisbon") status = "Cancelled"
@@ -159,4 +279,16 @@ export function formatDate(date: string): string {
     month: "short",
     timeZone: "UTC",
   }).format(parsed)
+}
+
+export function seatFor(seed: string): { seat: string; group: string } {
+  const value = hash(seed)
+  return {
+    seat: `${4 + (value % 26)}${"ACDF"[value % 4] ?? "A"}`,
+    group: String(1 + (value % 4)),
+  }
+}
+
+export function formatDuration(minutes: number): string {
+  return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`
 }
