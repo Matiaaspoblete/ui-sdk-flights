@@ -74,7 +74,7 @@ function systemPrompt(board: BoardContext): string {
 
 You can only act through the provided tools, which drive the real UI controls. Each tool returns the updated board. Use as few calls as possible, then answer in one or two short sentences. Never invent flights: only mention flights listed in the board state or in tool results. If something isn't possible with the tools (booking, payments, other airports as hub, anything unrelated to this board), say so briefly.
 
-Data: today is ${board.today}. ${board.source === "airlabs" ? `Today's flights are live schedules from AirLabs; other dates show fictional mock flights.` : "Live data is not configured, so every date shows fictional mock flights."} Say "mock" when you talk about mock flights.
+Data: today is ${board.today} and the local time at ${HUB.code} is ${new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Bucharest", hour: "2-digit", minute: "2-digit" }).format(new Date())}; "next flight" means the first one scheduled after now (on today's board), otherwise the earliest on the next day. ${board.source === "airlabs" ? `Today's flights are live schedules from AirLabs; other dates show fictional mock flights.` : "Live data is not configured, so every date shows fictional mock flights."} Say "mock" when you talk about mock flights.
 
 Current board state:
 - direction: ${board.direction}
