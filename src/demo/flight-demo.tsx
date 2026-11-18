@@ -55,7 +55,9 @@ import {
   XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
+import type { BoardContext } from "@/agent/tools"
 import { AgentPanel, type LogEntry } from "./agent-panel"
+import { AskAgent, type AgentStep } from "./ask-agent"
 import { ALLOWED_ACTIONS, getAgent } from "./agent"
 import { BoardingPass } from "./boarding-pass"
 import type { Board as LiveBoard } from "@/server/flights"
@@ -215,6 +217,57 @@ export function FlightDemo({ board }: { board: LiveBoard }) {
         (terminalFilter === "all" || flight.terminal === terminalFilter)
     )
   const selectedFlight = flights.find((flight) => flight.id === selected) ?? null
+  const logSeq = useRef(0)
+
+  const context: BoardContext = {
+    today,
+    source: board.source,
+    direction,
+    date: day,
+    dateRange: [addDays(today, -1), addDays(today, 7)],
+    live: liveDay,
+    airport: airports.find((item) => item.code === airport)?.city ?? null,
+    terminal: terminals.find((item) => item.value === terminalFilter)?.label ?? "All terminals",
+    terminals: terminals.map((item) => item.label),
+    airports: airports.map((item) => item.city).filter((city, i, all) => all.indexOf(city) === i).slice(0, 80),
+    selectedFlight: selected,
+    flights: visible(direction)
+      .slice(0, 40)
+      .map((flight) => ({
+        id: flight.id,
+        number: flight.number,
+        airline: flight.airline.slice(0, 40),
+        city: flight.airport.city,
+        code: flight.airport.code,
+        time: flight.scheduled,
+        estimated: flight.estimated,
+        terminal: flight.terminal,
+        gate: flight.gate,
+        status: flight.status,
+      })),
+  }
+  const contextRef = useRef(context)
+  useEffect(() => {
+    contextRef.current = context
+  })
+
+  async function actStep(text: string, nextTarget: Target, step: AgentStep) {
+    const id = `ask-${logSeq.current++}`
+    setTarget(nextTarget)
+    setLog((entries) => [...entries, { id, text, call: step, state: "running" }])
+    await sleep(350)
+    const result = await getAgent().act({ steps: [step] })
+    setLog((entries) =>
+      entries.map((entry) =>
+        entry.id === id
+          ? { ...entry, state: result.ok ? "done" : "failed", error: result.error?.message }
+          : entry
+      )
+    )
+    await sleep(200)
+    setTarget(null)
+    return { ok: result.ok, error: result.error?.message }
+  }
 
   useEffect(() => {
     getAgent()
@@ -351,6 +404,17 @@ export function FlightDemo({ board }: { board: LiveBoard }) {
           </button>
         </div>
       </section>
+
+      <AskAgent
+        getBoard={() => contextRef.current}
+        act={actStep}
+        onStart={() => {
+          runId.current++
+          setRunning(false)
+          setPassOpen(false)
+          setLog([])
+        }}
+      />
 
       <section className="lab-filters" aria-label="Filters">
         <div className="lab-field" data-agent-target={target === "airport" || undefined}>

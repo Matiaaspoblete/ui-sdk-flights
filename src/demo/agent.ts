@@ -10,6 +10,7 @@ export const ALLOWED_ACTIONS = [
   { label: "Date", action: "setValue" },
   { label: "Terminal", action: "setValue" },
   { label: "Departures board", action: "setValue" },
+  { label: "Arrivals board", action: "setValue" },
   { label: "View boarding pass", action: "press" },
 ] as const
 
